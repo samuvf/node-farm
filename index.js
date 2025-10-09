@@ -36,15 +36,22 @@ const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, "utf-8");
 const dataObj = JSON.parse(data);
 
 const server = http.createServer((req, res) => {
-  path = req.url;
-  if ((path === "/") | (path === "/overview")) {
+  const { query, pathname } = url.parse(req.url, true);
+
+  if ((pathname === "/") | (pathname === "/overview")) {
+    res.writeHead(200, { "Content-type": "text/html" });
+
     const cardHtml = dataObj
       .map((el) => replaceTemplate(tempCard, el))
       .join("");
     const overview = tempOverview.replace("{%PRODUCT_CARD%}", cardHtml);
-    res.writeHead(200, { "Content-type": "text/html" });
     res.end(overview);
-  } else if (path === "/products") {
+  } else if (pathname === "/product") {
+    res.writeHead(200, { "Content-type": "text/html" });
+
+    const product = dataObj[query.id];
+    const output = replaceTemplate(tempProduct, product);
+    res.end(output);
   } else {
     res.writeHead(404, { "Content-type": "text/html" });
     res.end("<h1>Page not Found</h1>");
